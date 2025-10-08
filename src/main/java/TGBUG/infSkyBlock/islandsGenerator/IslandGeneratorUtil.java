@@ -40,7 +40,7 @@ public class IslandGeneratorUtil {
             // 跳过过近的中心点
             if (!isLocationValid(x, z, spacing, existingIslands)) continue;
 
-            return new Location(world, x + 0.5, 64, z + 0.5); // 中心点对齐
+            return new Location(world, x + 0.5, 64, z + 0.5);
         }
 
         throw new IllegalStateException("无法在规定次数内找到可用的岛屿中心位置！");

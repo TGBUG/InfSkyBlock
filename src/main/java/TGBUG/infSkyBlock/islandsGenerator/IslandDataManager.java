@@ -1,7 +1,6 @@
-package TGBUG.infSkyBlock.data;
+package TGBUG.infSkyBlock.islandsGenerator;
 
 import TGBUG.infSkyBlock.ConfigManager;
-import TGBUG.infSkyBlock.islandsGenerator.IslandGeneratorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -20,7 +19,7 @@ public class IslandDataManager {
     private final File file;
     private final FileConfiguration config;
     private final Map<String, Location> islandCenters = new HashMap<>();
-    private final ConfigManager cfm;
+    private ConfigManager cfm;
 
     public IslandDataManager(ConfigManager cfm) {
         this.cfm = cfm;

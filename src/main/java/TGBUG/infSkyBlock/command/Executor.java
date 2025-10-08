@@ -1,7 +1,8 @@
 package TGBUG.infSkyBlock.command;
 
-import TGBUG.infSkyBlock.data.IslandDataManager;
+import TGBUG.infSkyBlock.islandsGenerator.IslandDataManager;
 import TGBUG.infSkyBlock.islandsGenerator.OneBlockGenerator;
+import TGBUG.infSkyBlock.menu.MenuManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,10 +13,12 @@ import org.bukkit.plugin.Plugin;
 public class Executor implements CommandExecutor {
     private final Plugin plugin;
     private IslandDataManager isdm;
+    private MenuManager mm;
 
-    public Executor(Plugin plugin, IslandDataManager isdm) {
+    public Executor(Plugin plugin, IslandDataManager isdm, MenuManager mm) {
         this.plugin = plugin;
         this.isdm = isdm;
+        this.mm = mm;
     }
 
     @Override
@@ -24,7 +27,7 @@ public class Executor implements CommandExecutor {
             if (sender instanceof ConsoleCommandSender) {
                 plugin.getLogger().info("§b--------InfSkyBlock--------\n§2运行状态: §a正常\n§6当前版本: Test");
             } else {
-                //TODO:打开菜单
+                mm.openMenu("main", (Player) sender);
             }
             return false;
         }

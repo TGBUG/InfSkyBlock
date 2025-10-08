@@ -1,0 +1,40 @@
+main:
+  title: "&a空岛主菜单"
+  size: 54
+  open-sound: "BLOCK_CHEST_OPEN"
+  items:
+    0:
+      material: "GRASS_BLOCK"
+      name: "&a创建空岛"
+      lore:
+        - "&7点击创建一个新的空岛"
+      command: "is create"
+      enchanted: true
+    1:
+      material: "ENDER_PEARL"
+      name: "&b传送至空岛"
+      lore:
+        - "&7点击传送到你的空岛"
+      command: "is go"
+      enchanted: false
+    8:
+      material: "BARRIER"
+      name: "&c关闭菜单"
+      lore:
+        - "&7关闭当前菜单"
+      command: "menu close"
+
+shop:
+  title: "&e空岛商店"
+  size: 27
+  open-sound: "ENTITY_VILLAGER_YES"
+  items:
+    0:
+      material: "DIAMOND"
+      name: "&b购买资源"
+      lore:
+        - "&7进入资源购买界面"
+      command: "menu open shop_resources"
+      enchanted: false
+    1:
+      placeholder: "%shop_item_1%"
