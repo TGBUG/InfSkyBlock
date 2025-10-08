@@ -1,0 +1,10 @@
+name: InfSkyBlock
+version: '0.0.0'
+main: TGBUG.infSkyBlock.InfSkyBlock
+api-version: '1.18'
+load: STARTUP
+authors: [ TGBUG ]
+website: infcraft.cn
+commands:
+  infskyblock:
+    aliases: [isb, is]

@@ -1,0 +1,7 @@
+#世界重生点
+SpawnX: 0
+SpawnY: 64
+SpawnZ: 0
+
+#岛屿保护范围（岛屿核心之间的间隔将是此值的两倍）
+IsLandProtectionRage: 4096
