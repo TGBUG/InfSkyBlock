@@ -1,0 +1,14 @@
+TGBUG\infSkyBlock\ConfigManager.class
+TGBUG\infSkyBlock\menu\BaseMenu.class
+TGBUG\infSkyBlock\menu\GenericMenu.class
+TGBUG\infSkyBlock\islandsGenerator\IslandGeneratorUtil.class
+TGBUG\infSkyBlock\menu\MenuManager.class
+TGBUG\infSkyBlock\command\Executor.class
+TGBUG\infSkyBlock\menu\MenuClickListener.class
+TGBUG\infSkyBlock\command\TabCompleter.class
+TGBUG\infSkyBlock\islandsGenerator\IslandDataManager.class
+TGBUG\infSkyBlock\islandsGenerator\OneBlockGenerator.class
+TGBUG\infSkyBlock\VoidWorldGenerator.class
+TGBUG\infSkyBlock\InfSkyBlock.class
+TGBUG\infSkyBlock\menu\PlaceholderMenuHandler.class
+TGBUG\infSkyBlock\menu\MainMenu.class

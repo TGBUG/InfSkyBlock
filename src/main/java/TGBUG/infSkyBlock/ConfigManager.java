@@ -33,6 +33,7 @@ public class ConfigManager {
         }
         List<String> configList = new ArrayList<>();
         configList.add("config.yml");
+        configList.add("menus.yml");
         for (String configFile : configList) {
             File f = new File(plugin.getDataFolder(), configFile);
             if (!f.exists()) {

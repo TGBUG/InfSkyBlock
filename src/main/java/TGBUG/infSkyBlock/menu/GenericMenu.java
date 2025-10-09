@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@SuppressWarnings("unchecked")
 public class GenericMenu extends BaseMenu {
 
     private final ConfigManager cfm;
@@ -33,7 +32,10 @@ public class GenericMenu extends BaseMenu {
         }
 
         String title = ChatColor.translateAlternateColorCodes('&', Objects.toString(menu.get("title"), "&7未命名菜单"));
-        int size = (int) menu.getOrDefault("size", 54);
+        // 读取菜单大小
+        Object sizeObj = menu.get("size");
+        int size = 54;
+        if (sizeObj instanceof Number n) size = n.intValue();
         Inventory inv = Bukkit.createInventory(null, size, title);
 
         Object itemsObj = menu.get("items");
@@ -55,8 +57,11 @@ public class GenericMenu extends BaseMenu {
                     continue;
                 }
 
-                // 🧱 静态物品
-                Material material = Material.matchMaterial(Objects.toString(itemData.getOrDefault("material", "STONE")));
+                // 读取物品类型
+                Object matObj = itemData.get("material");
+                String matName = (matObj != null) ? matObj.toString() : "STONE";
+                Material material = Material.matchMaterial(matName);
+                if (material == null) material = Material.STONE;
                 if (material == null) material = Material.STONE;
 
                 ItemStack item = new ItemStack(material);
