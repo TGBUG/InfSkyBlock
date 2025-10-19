@@ -72,7 +72,7 @@ public class MenuClickListener implements Listener {
                 // 支持执行玩家命令
                 player.closeInventory();
                 Bukkit.getScheduler().runTaskLater( // 异步执行以防止冲突
-                        Bukkit.getPluginManager().getPlugin("YourPluginName"),
+                        Bukkit.getPluginManager().getPlugin("InfSkyBlock"),
                         () -> player.performCommand(cmd),
                         1L
                 );
