@@ -25,5 +25,6 @@ public abstract class BaseMenu {
     public void open(Player player) {
         Inventory inv = build(player);
         player.openInventory(inv);
+        MenuManager.setCurrentMenu(player, id);
     }
 }

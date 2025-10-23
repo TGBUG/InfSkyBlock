@@ -8,8 +8,10 @@ main:
       name: "&a前往空岛"
       lore:
         - "&7点击前往你的空岛"
-      command: "is create"
+      command: "is toisland"
       enchanted: false
+    1:
+      placeholder: "%example_placeholder%"
     8:
       material: "BARRIER"
       name: "&c关闭菜单"

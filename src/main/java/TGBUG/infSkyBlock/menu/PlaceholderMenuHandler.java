@@ -1,106 +1,78 @@
 package TGBUG.infSkyBlock.menu;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.enchantments.Enchantment;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiFunction;
+import org.bukkit.ChatColor;
+import java.util.*;
+import java.util.function.*;
 
 /**
- * 用于在菜单中处理占位符槽位的动态物品生成。
- * 支持注册自定义占位符解析器。
+ * 统一的占位符解释与点击行为系统
  */
 public class PlaceholderMenuHandler {
 
-    /**
-     * 注册的占位符解析器
-     * key = 占位符名称（不含%号）
-     * value = 解析函数 (player, placeholderString) -> ItemStack
-     */
-    private static final Map<String, BiFunction<Player, String, ItemStack>> resolvers = new HashMap<>();
+    // 注册占位符 → 对应的显示与点击处理器
+    private static final Map<String, PlaceholderHandler> handlers = new HashMap<>();
 
     /**
-     * 注册一个占位符解析器
-     * @param key 占位符名（例如 "island_config_1"）
-     * @param handler 解析逻辑
+     * 注册一个新的占位符
+     * @param placeholder 占位符名称（例如 %island_config_1%）
+     * @param displayFunction 构建显示物品的方法
+     * @param clickFunction 点击该占位符物品时的行为
      */
-    public static void register(String key, BiFunction<Player, String, ItemStack> handler) {
-        resolvers.put(key.toLowerCase(), handler);
+    public static void register(String placeholder,
+                                BiFunction<Player, String, ItemStack> displayFunction,
+                                BiConsumer<Player, String> clickFunction) {
+        handlers.put(placeholder.toLowerCase(), new PlaceholderHandler(displayFunction, clickFunction));
     }
 
     /**
-     * 处理占位符并填充到菜单槽位中
+     * 处理物品填充
      */
     public static void handle(Inventory inv, int slot, String placeholder, Player player) {
-        if (placeholder == null || placeholder.isEmpty()) return;
-
-        // 去掉占位符两侧的 "%"
-        String cleanKey = placeholder.replace("%", "").toLowerCase();
-
-        // 如果存在对应解析器则调用
-        BiFunction<Player, String, ItemStack> resolver = resolvers.get(cleanKey);
-        if (resolver != null) {
-            ItemStack item = resolver.apply(player, cleanKey);
-            if (item != null) {
-                inv.setItem(slot, item);
-                return;
-            }
+        PlaceholderHandler handler = handlers.get(placeholder.toLowerCase());
+        if (handler == null) {
+            // 未注册 → 显示默认占位物品
+            inv.setItem(slot, createDefaultPlaceholderItem(placeholder));
+            return;
         }
-
-        // 未注册的占位符 -> 显示一个红色玻璃提示
-        inv.setItem(slot, createPlaceholderErrorItem(placeholder));
+        inv.setItem(slot, handler.getDisplay(player, placeholder));
     }
 
     /**
-     * 演示解析器
+     * 处理点击事件
+     */
+    public static void handleClick(Player player, String placeholder) {
+        PlaceholderHandler handler = handlers.get(placeholder.toLowerCase());
+        if (handler != null) {
+            handler.onClick(player, placeholder);
+        }
+    }
+
+    /**
+     * 注册默认示例占位符
      */
     public static void registerDefaults() {
-        register("example_placeholder", (player, key) -> {
+        register("%example_placeholder%", (player, ph) -> {
             ItemStack item = new ItemStack(Material.PAPER);
             ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName(ChatColor.GREEN + "Hello, " + player.getName() + "!");
-            meta.setLore(java.util.List.of(ChatColor.GRAY + "这是一个示例占位符: " + key));
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            meta.setDisplayName(ChatColor.YELLOW + "示例占位符");
+            meta.setLore(List.of(ChatColor.GRAY + "示例"));
             item.setItemMeta(meta);
             return item;
+        }, (player, ph) -> {
+            player.performCommand("say 114514");
         });
     }
 
-    /**
-     * 当占位符无对应解析器时显示的默认物品
-     */
-    private static ItemStack createPlaceholderErrorItem(String placeholder) {
+    private static ItemStack createDefaultPlaceholderItem(String placeholder) {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.RED + "无效占位符");
-        meta.setLore(java.util.List.of(ChatColor.GRAY + placeholder));
+        meta.setDisplayName(ChatColor.RED + "未知占位符: " + placeholder);
         item.setItemMeta(meta);
         return item;
-    }
-
-    /**
-     * 当玩家点击带占位符的物品时调用。
-     * 可以在此触发自定义逻辑，如打开子菜单、切换状态等。
-     */
-    public static void handlePlaceholderClick(Player player, String placeholder) {
-        String cleanKey = placeholder.replace("%", "").toLowerCase();
-
-        // 根据注册的解析器名称触发行为（可选扩展）
-        if (cleanKey.startsWith("island_config_")) {
-            player.sendMessage(ChatColor.YELLOW + "[菜单系统] 你点击了岛屿配置项: " + cleanKey);
-            // TODO: 触发岛屿配置逻辑
-            return;
-        }
-
-        player.sendMessage(ChatColor.RED + "该占位符未定义点击行为: " + placeholder);
     }
 }

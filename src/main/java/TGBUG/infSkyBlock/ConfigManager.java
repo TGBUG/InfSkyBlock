@@ -27,10 +27,6 @@ public class ConfigManager {
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdir();
         }
-        File configFolder = new File(plugin.getDataFolder(), "configs");
-        if (!configFolder.exists()) {
-            configFolder.mkdir();
-        }
         List<String> configList = new ArrayList<>();
         configList.add("config.yml");
         configList.add("menus.yml");

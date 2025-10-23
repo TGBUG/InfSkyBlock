@@ -1,48 +1,53 @@
 package TGBUG.infSkyBlock.menu;
 
 import TGBUG.infSkyBlock.ConfigManager;
+import TGBUG.infSkyBlock.InfSkyBlock;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
-/**
- * 菜单管理器 - 统一控制菜单打开与解析逻辑
- */
 public class MenuManager {
-
-    private final ConfigManager cfm;
+    private final InfSkyBlock main;
     private final Map<String, BaseMenu> menuInstances = new HashMap<>();
 
-    public MenuManager(ConfigManager cfm) {
-        this.cfm = cfm;
+    private static final Map<String, String> playerMenuMap = new HashMap<>();
+
+    public MenuManager(InfSkyBlock main) {
+        this.main = main;
     }
 
-    /**
-     * 打开指定菜单
-     */
+    /** 记录玩家当前打开的菜单 */
+    public static void setCurrentMenu(Player player, String id) {
+        playerMenuMap.put(player.getName(), id);
+    }
+
+    /** 获取玩家当前打开的菜单ID */
+    public static String getCurrentMenu(Player player) {
+        return playerMenuMap.get(player.getName());
+    }
+
+    /** 清除玩家菜单记录 */
+    public static void clearCurrentMenu(Player player) {
+        playerMenuMap.remove(player.getName());
+    }
+
+    /** 打开菜单 */
     public void openMenu(String menuId, Player player) {
         BaseMenu menu = getOrCreate(menuId);
         if (menu == null) {
             player.sendMessage("§c菜单未找到: " + menuId);
             return;
         }
-
-        // 打开前刷新占位符（可拓展为更新物品状态）
         menu.open(player);
     }
 
-    /**
-     * 从缓存中获取菜单实例，若不存在则构建
-     */
     private BaseMenu getOrCreate(String id) {
+        ConfigManager cfm = main.getConfigManager();
+
         if (menuInstances.containsKey(id)) return menuInstances.get(id);
 
         Object obj = cfm.getConfig("menus.yml", id);
         if (obj == null) return null;
 
-        // ✅ 此处可按ID选择不同子类
         BaseMenu menu;
         switch (id.toLowerCase()) {
             case "main" -> menu = new MainMenu(cfm);
@@ -53,17 +58,6 @@ public class MenuManager {
         return menu;
     }
 
-    /**
-     * 刷新单个菜单实例（可在 /menu reload 时调用）
-     */
-    public void refresh(String id) {
-        menuInstances.remove(id);
-    }
-
-    /**
-     * 刷新全部菜单实例
-     */
-    public void refreshAll() {
-        menuInstances.clear();
-    }
+    public void refresh(String id) { menuInstances.remove(id); }
+    public void refreshAll() { menuInstances.clear(); }
 }

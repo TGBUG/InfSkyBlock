@@ -1,6 +1,7 @@
 package TGBUG.infSkyBlock.islandsGenerator;
 
 import TGBUG.infSkyBlock.ConfigManager;
+import TGBUG.infSkyBlock.InfSkyBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -19,11 +20,11 @@ public class IslandDataManager {
     private final File file;
     private final FileConfiguration config;
     private final Map<String, Location> islandCenters = new HashMap<>();
-    private ConfigManager cfm;
+    private final InfSkyBlock main;
 
-    public IslandDataManager(ConfigManager cfm) {
-        this.cfm = cfm;
-        this.file = cfm.getConfigFile("islands.yml");
+    public IslandDataManager(InfSkyBlock main) {
+        this.main = main;
+        this.file = main.getConfigManager().getConfigFile("islands.yml");
 
         this.config = YamlConfiguration.loadConfiguration(file);
         loadIslands();
@@ -95,7 +96,7 @@ public class IslandDataManager {
             player.getName(),
             IslandGeneratorUtil.findAvailableIslandCenter(
                 ((Player)player).getWorld(),
-                ((int)cfm.getConfig("config.yml", "IsLandProtectionRage")),
+                ((int)main.getConfigManager().getConfig("config.yml", "IsLandProtectionRage")),
                 getIslandCenters()
             )
         );

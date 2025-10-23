@@ -1,90 +1,68 @@
 package TGBUG.infSkyBlock.menu;
 
 import TGBUG.infSkyBlock.ConfigManager;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import TGBUG.infSkyBlock.InfSkyBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * 监听玩家点击菜单并执行配置动作。
- */
 public class MenuClickListener implements Listener {
 
-    private final ConfigManager cfm;
+    private final InfSkyBlock main;
 
-    public MenuClickListener(ConfigManager cfm) {
-        this.cfm = cfm;
+    public MenuClickListener(InfSkyBlock main) {
+        this.main = main;
     }
 
-    @SuppressWarnings("unchecked")
     @EventHandler
-    public void onMenuClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
-        Inventory inv = event.getClickedInventory();
-        if (inv == null || event.getSlotType() != InventoryType.SlotType.CONTAINER) return;
+    public void onInventoryClick(InventoryClickEvent e) {
+        if (!(e.getWhoClicked() instanceof Player player)) return;
+        if (e.getClickedInventory() == null) return;
 
-        // 判断是否为自定义菜单
-        String title = ChatColor.stripColor(event.getView().getTitle());
-        Object mainMenuObj = cfm.getConfig("menus.yml", "main");
-        if (!(mainMenuObj instanceof Map<?, ?> mainMenu)) return;
+        String menuId = MenuManager.getCurrentMenu(player);
+        if (menuId == null) return; // 玩家当前没打开菜单
 
-        String configTitle = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',
-                Objects.toString(mainMenu.get("title"), "空岛菜单")));
+        e.setCancelled(true);
 
-        // 若标题匹配，认为是我们的菜单
-        if (!title.equals(configTitle)) return;
+        Object menuObj = main.getConfigManager().getConfig("menus.yml", menuId);
+        if (!(menuObj instanceof Map<?, ?> menu)) return;
 
-        event.setCancelled(true); // 防止玩家拿走物品
-        int slot = event.getRawSlot();
-
-        // 从配置中读取该槽位定义
-        Object itemsObj = mainMenu.get("items");
+        Object itemsObj = menu.get("items");
         if (!(itemsObj instanceof Map<?, ?> itemsMap)) return;
-        Object itemObj = itemsMap.get(String.valueOf(slot));
+
+        int slot = e.getSlot();
+        Object itemObj = itemsMap.get(slot);
         if (!(itemObj instanceof Map<?, ?> itemData)) return;
 
-        // 处理占位符点击
+        // 如果有 placeholder，则交由占位符解释器处理点击
         if (itemData.containsKey("placeholder")) {
             String placeholder = Objects.toString(itemData.get("placeholder"));
-            PlaceholderMenuHandler.handlePlaceholderClick(player, placeholder);
+            PlaceholderMenuHandler.handleClick(player, placeholder);
             return;
         }
 
-        // 处理命令点击
+        // 如果有 command 配置
         if (itemData.containsKey("command")) {
-            String cmd = Objects.toString(itemData.get("command")).trim();
-            if (cmd.equalsIgnoreCase("menu close")) {
-                player.closeInventory();
-                return;
-            }
-
-            if (!cmd.isEmpty()) {
-                // 支持执行玩家命令
-                player.closeInventory();
-                Bukkit.getScheduler().runTaskLater( // 异步执行以防止冲突
-                        Bukkit.getPluginManager().getPlugin("InfSkyBlock"),
-                        () -> player.performCommand(cmd),
-                        1L
-                );
+            Object cmdObj = itemData.get("command");
+            if (cmdObj instanceof String str) {
+                if (str.equalsIgnoreCase("menu close")) {
+                    player.closeInventory();
+                    return;
+                }
+                player.performCommand(str.replace("%player%", player.getName()));
             }
         }
     }
 
-    /**
-     * 可选：监听关闭菜单事件（预留扩展）
-     */
     @EventHandler
-    public void onMenuClose(InventoryCloseEvent event) {
-        // 将来可在此处理菜单清理逻辑，例如刷新缓存、释放资源等
+    public void onInventoryClose(InventoryCloseEvent e) {
+        if (e.getPlayer() instanceof Player player) {
+            MenuManager.clearCurrentMenu(player);
+        }
     }
 }

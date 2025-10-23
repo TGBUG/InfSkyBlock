@@ -5,11 +5,19 @@ import TGBUG.infSkyBlock.command.TabCompleter;
 import TGBUG.infSkyBlock.islandsGenerator.IslandDataManager;
 import TGBUG.infSkyBlock.menu.MenuClickListener;
 import TGBUG.infSkyBlock.menu.MenuManager;
+import TGBUG.infSkyBlock.menu.PlaceholderMenuHandler;
 import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
+import java.util.Set;
 
 public final class InfSkyBlock extends JavaPlugin {
     private ConfigManager c;
@@ -20,13 +28,14 @@ public final class InfSkyBlock extends JavaPlugin {
     public void onEnable() {
         initConfigManager();
 
-        initIslands(c);
+        initMenus();
 
-        initMenus(c);
+        initEventHandlers();
 
-        initCommands(isdm, mm);
+        initCommands();
 
-        initEventHandlers(c);
+        //just for test
+        PlaceholderMenuHandler.registerDefaults();
 
         getLogger().info("InfSkyBlock Test version is enabled");
     }
@@ -58,32 +67,50 @@ public final class InfSkyBlock extends JavaPlugin {
         }
     }
 
-    private void initCommands(IslandDataManager isdm, MenuManager mm) {
-        getCommand("infskyblock").setExecutor(new Executor(this, isdm, mm));
+    private void initCommands() {
+        getCommand("infskyblock").setExecutor(new Executor(this));
         getCommand("infskyblock").setTabCompleter(new TabCompleter(this));
     }
 
-    private void initIslands(ConfigManager c) {
-        isdm = new IslandDataManager(c);
+    private void initIslands() {
+        isdm = new IslandDataManager(this);
     }
 
-    private void initEventHandlers(ConfigManager c) {
-        Bukkit.getPluginManager().registerEvents(new MenuClickListener(c), this);
+    private void initEventHandlers() {
+        Bukkit.getPluginManager().registerEvents(new MenuClickListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new WorldloaderListener(this), this);
     }
 
-    private void initMenus(ConfigManager c) {
-        mm = new MenuManager(c);
+    private void initMenus() {
+        mm = new MenuManager(this);
     }
-//
-//    public MenuManager getMenuManager() {
-//        return mm;
-//    }
-//
-//    public ConfigManager getConfigManager() {
-//        return c;
-//    }
-//
-//    public IslandDataManager getIslandDataManager() {
-//        return isdm;
-//    }
+
+    private class WorldloaderListener implements Listener {
+        private final InfSkyBlock plugin;
+
+        private WorldloaderListener(InfSkyBlock plugin) {
+            this.plugin = plugin;
+        }
+
+        @EventHandler
+        public void onWorldLoad(WorldLoadEvent e) {
+            if (Bukkit.getWorld("world") != null & Bukkit.getWorld("world_nether") != null & Bukkit.getWorld("world_the_end") != null) {
+                plugin.getLogger().info("所有岛屿世界已加载完毕，开始加载岛屿数据...");
+                Bukkit.getScheduler().runTask(plugin, InfSkyBlock.this::initIslands);
+                HandlerList.unregisterAll(this);
+            }
+        }
+    }
+
+    public MenuManager getMenuManager() {
+        return mm;
+    }
+
+    public ConfigManager getConfigManager() {
+        return c;
+    }
+
+    public IslandDataManager getIslandDataManager() {
+        return isdm;
+    }
 }
